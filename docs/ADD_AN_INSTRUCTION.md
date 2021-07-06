@@ -2,6 +2,7 @@
 
 *Note*: this document focuses primarily on x86 instructions, but we will extend it with sections for other architectures as the support for them is added to Remill.
 本文档主要关注 x86 指令，但我们将使用其他架构的部分对其进行扩展，因为 Remill 添加了对它们的支持。
+
 Let's assume that you want to add support for lifting a particular instruction, but don't know where to add it, how to name it, or how the code for writing semantics works.
 
 We use the following nomenclature:
@@ -11,9 +12,9 @@ We use the following nomenclature:
 
 ## Using XED to guide the creation of a new instruction semantic (x86)
 
-Start by finding your instruction within the [XED tables document](XED/xed.txt). We will use `AND` as a running example.
+Start by finding your instruction within the [XED tables document](XED/xed.txt)XED 表格文档中. We will use `AND` as a running example.
 
-To start off, here are two entries from the tables document:
+To start off, here are two entries(两个条目） from the tables document:
 
 ```text
 1191 AND AND_GPRv_MEMv LOGICAL BASE I86 ATTRIBUTES: SCALABLE 
@@ -31,15 +32,15 @@ To start off, here are two entries from the tables document:
 
 These entries contain a lot of information and are quite dense. Below are descriptions of the salient parts.
 
-- `AND`: The name of the instruction. This is typically the opcode, though sometimes it will be more specific. In general, there is a one-to-one correspondence between an instruction name and its *SEM*: a generic function that you will define to implement the multiple variants of this instruction.
-- `LOGICAL`: This is the category of the instruction. This will generally tell you where to put your instruction code. In this case, we would implement the instruction in the [LOGICAL.cpp](/remill/Arch/X86/Semantics/LOGICAL.cpp) file.
-- `AND_GPRv_MEMv`: This is the *ISEL*: an instantiation of your instruction's semantic function.
-- `SCALABLE`: This tells you that a particular *ISEL* can actually relate to a number of different operand sizes. We have short forms and naming conventions for writing one *ISEL* for all the operand sizes; however, this can be done manually as well. One XED convention is that if you see a `z` or `v` within the *ISEL*, then the instruction is probably scalable.
-- `EXPLICIT`: This is an explicit operand. If you were to try to type out this instruction as assembly code and assemble it, then an explicit operand is one that you must specify after the opcode mnemonic. In Remill, your semantic functions will have _at least one argument for each explicit operand_.
-- `IMPLICIT`: This is an implicit operand. You can think of this as being an operand that you _might_ write out in assembly. Alternatively, you can see it as an operand that is explicit in at least one *ISEL*. Not to be confused with SUPPRESSED.
-- `SUPPRESSED`: This is an operand that is never written out in assembly, but is operated on internally by the semantics of an instruction. In Remill, you *do not* associate any arguments in your semantic functions with suppressed operands.
-- `R`, `RW`, `W`, `CR`, `CW`, `RCW`: These per-operand markers indicate how the semantics of the instruction operate on a particular operand, or in other words, they describe the mutability of the operand. `R` stands for read, `W` stands for write, and `C` stands for condition. Therefore, `RCW` states that the semantics will read and conditionally write to the associated operand.
-- `REG`, `MEM`, `IMM`: These identify the type of the operand within a particular instruction selection (ISEL). Remill has C++ type names associated with each operand type and size, defined in [Types.h](https://github.com/lifting-bits/remill/blob/master/remill/Arch/Runtime/Types.h)
+- `AND`: 命令的名字。The name of the instruction. This is typically the opcode, though sometimes it will be more specific. In general, there is a one-to-one correspondence between an instruction name and its *SEM*: a generic function that you will define to implement the multiple variants of this instruction.
+- `LOGICAL`: 指令的类别，通常告诉你指令代码在哪。This is the category of the instruction. This will generally tell you where to put your instruction code. In this case, we would implement the instruction in the [LOGICAL.cpp](/remill/Arch/X86/Semantics/LOGICAL.cpp) file.
+- `AND_GPRv_MEMv`:这是ISEL：您指令的语义功能的实例化。 This is the *ISEL*: an instantiation of your instruction's semantic function.
+- `SCALABLE`: 这告诉您特定的ISEL实际上可以与许多不同的操作数大小相关。我们有为所有操作数大小编写一个ISEL 的简短格式和命名约定；但是，这也可以手动完成。一种 XED 约定是，如果您在ISEL 中看到z或v，则该指令可能是可扩展的。vThis tells you that a particular *ISEL* can actually relate to a number of different operand sizes. We have short forms and naming conventions for writing one *ISEL* for all the operand sizes; however, this can be done manually as well. One XED convention is that if you see a `z` or `v` within the *ISEL*, then the instruction is probably scalable.
+- `EXPLICIT`: 显示操作数This is an explicit operand. If you were to try to type out this instruction as assembly code and assemble it, then an explicit operand is one that you must specify after the opcode mnemonic. In Remill, your semantic functions will have _at least one argument for each explicit operand_.
+- `IMPLICIT`: 隐式操作数可以将其视为可能在汇编中写出的操作数。This is an implicit operand. You can think of this as being an operand that you _might_ write out in assembly. Alternatively, you can see it as an operand that is explicit in at least one *ISEL*. Not to be confused with SUPPRESSED.
+- `SUPPRESSED`: 这是一个永远不会用汇编写出的操作数，而是通过指令的语义在内部进行操作。This is an operand that is never written out in assembly, but is operated on internally by the semantics of an instruction. In Remill, you *do not* associate any arguments in your semantic functions with suppressed operands.
+- `R`, `RW`, `W`, `CR`, `CW`, `RCW`:每个操作数的标记指示指令的语义如何对特定操作数进行操作 These per-operand markers indicate how the semantics of the instruction operate on a particular operand, or in other words, they describe the mutability of the operand. `R` stands for read, `W` stands for write, and `C` stands for condition. Therefore, `RCW` states that the semantics will read and conditionally write to the associated operand.R代表读，W代表写，C代表条件。因此，RCW声明语义将读取并有条件地写入关联的操作数
+- `REG`, `MEM`, `IMM`: 这些标识特定指令选择 (ISEL) 中操作数的类型。These identify the type of the operand within a particular instruction selection (ISEL). Remill has C++ type names associated with each operand type and size, defined in [Types.h](https://github.com/lifting-bits/remill/blob/master/remill/Arch/Runtime/Types.h)Remill 具有与每个操作数类型和大小相关联的 C++ 类型名称，在Types.h 中定义
 
 In the following code examples we will ignore condition code computation. Most instructions that manipulate condition codes have already been implemented.
 
