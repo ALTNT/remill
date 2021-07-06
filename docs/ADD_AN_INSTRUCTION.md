@@ -1,13 +1,13 @@
 # How to add support for a new instruction to Remill
 
 *Note*: this document focuses primarily on x86 instructions, but we will extend it with sections for other architectures as the support for them is added to Remill.
-
+本文档主要关注 x86 指令，但我们将使用其他架构的部分对其进行扩展，因为 Remill 添加了对它们的支持。
 Let's assume that you want to add support for lifting a particular instruction, but don't know where to add it, how to name it, or how the code for writing semantics works.
 
 We use the following nomenclature:
 
-- *SEM*: The semantics of an instruction. This is code that implements an instruction's behaviour in a generic way (often, with templated operands).
-- *ISEL*: An instruction 'selection'. Think of this as an instantiation of some semantics for a particular encoding of an instruction, or in C++ terms, as an instantiation of the templated semantic. Different encodings of the same high-level instruction can affect different sizes and types of operands.
+- *SEM*: The semantics of an instruction. This is code that implements an instruction's behaviour in a generic way (often, with templated operands).指令的语义。这是以通用方式（通常使用模板化操作数）实现指令行为的代码。
+- *ISEL*: An instruction 'selection'. Think of this as an instantiation of some semantics for a particular encoding of an instruction, or in C++ terms, as an instantiation of the templated semantic. Different encodings of the same high-level instruction can affect different sizes and types of operands.指令“选择”。将此视为特定指令编码的某些语义的实例化，或在 C++ 术语中，视为模板化语义的实例化。同一高级指令的不同编码会影响不同大小和类型的操作数。
 
 ## Using XED to guide the creation of a new instruction semantic (x86)
 
